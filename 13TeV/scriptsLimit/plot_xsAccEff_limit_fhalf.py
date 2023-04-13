@@ -1,0 +1,179 @@
+#!/usr/bin/env python
+import sys, os, subprocess, string, re
+from ROOT import *
+from array import array
+
+
+gROOT.SetBatch(kTRUE);
+gStyle.SetOptStat(0)
+gStyle.SetOptTitle(0)
+gStyle.SetTitleFont(42, "XYZ")
+gStyle.SetTitleSize(0.045, "XYZ")
+gStyle.SetLabelFont(42, "XYZ")
+gStyle.SetLabelSize(0.045, "XYZ")
+gStyle.SetCanvasBorderMode(0)
+gStyle.SetFrameBorderMode(0)
+gStyle.SetCanvasColor(kWhite)
+gStyle.SetPadTickX(1)
+gStyle.SetPadTickY(1)
+t_m = 0.06  ##top margin
+b_m = 0.11   ##botton margin
+l_m = 0.115  ##left margin
+r_m = 0.04  ##right margin
+gStyle.SetPadTopMargin(t_m)
+gStyle.SetPadBottomMargin(b_m)
+gStyle.SetPadLeftMargin(l_m)
+gStyle.SetPadRightMargin(r_m)
+gROOT.ForceStyle()
+
+
+BR = 1.0
+
+
+
+masses = array('d', [700.0, 800.0, 900.0, 1000.0, 1100.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0, 2100.0, 2200.0, 2300.0, 2400.0, 2500.0, 2600.0, 2700.0, 2800.0, 2900.0, 3000.0, 3100.0, 3200.0, 3300.0, 3400.0, 3500.0, 3600.0, 3700.0, 3800.0, 3900.0, 4000.0, 4100.0, 4200.0, 4300.0, 4400.0])
+
+xs_obs_limits  = array('d', [0.032172199999999998, 0.024260199999999999, 0.010855800000000001, 0.0064181300000000002, 0.00612737, 0.0081219699999999992, 0.0059957400000000003, 0.0041369700000000002, 0.0045401699999999996, 0.0030634600000000001, 0.0016879, 0.00125464, 0.0013544799999999999, 0.0012093200000000001, 0.00127977, 0.00141212, 0.0010134300000000001, 0.00091388000000000005, 0.00087230999999999995, 0.00061186599999999997, 0.00036649700000000003, 0.00030618000000000003, 0.00032108199999999999, 0.00032019699999999998, 0.000268857, 0.00021519400000000001, 0.000192614, 0.00018234999999999999, 0.000178498, 0.00017445899999999999, 0.000171323, 0.00016876, 0.000175458, 0.00017492399999999999, 0.00017190099999999999, 0.00017047399999999999, 0.00016924999999999999, 0.00016825299999999999])
+xs_obs_limits_fb = array('d', [1000.0 * float(b) for b in xs_obs_limits ])
+
+xs_exp_limits = array('d', [0.0278354, 0.019607099999999999, 0.0140716, 0.0110133, 0.0074034499999999998, 0.0064555899999999998, 0.0050389099999999997, 0.0038131100000000002, 0.0030704999999999999, 0.00265388, 0.0022444700000000001, 0.0018590799999999999, 0.0015267900000000001, 0.0012567100000000001, 0.00105043, 0.00089681899999999998, 0.00079180799999999996, 0.00073319599999999998, 0.00065157400000000003, 0.00054867900000000005, 0.000472962, 0.00043129000000000003, 0.00039145599999999999, 0.00036148000000000002, 0.00032476400000000001, 0.00030740900000000002, 0.00029187199999999999, 0.00027356199999999998, 0.00026519599999999999, 0.00025462999999999999, 0.000239583, 0.000225839, 0.00021346399999999999, 0.00020655200000000001, 0.00019942700000000001, 0.00019216799999999999, 0.00018810800000000001, 0.00018794800000000001])
+xs_exp_limits_fb = array('d', [1000.0 * float(b) for b in xs_exp_limits ])
+
+masses_exp = array('d', [700.0, 800.0, 900.0, 1000.0, 1100.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0, 2100.0, 2200.0, 2300.0, 2400.0, 2500.0, 2600.0, 2700.0, 2800.0, 2900.0, 3000.0, 3100.0, 3200.0, 3300.0, 3400.0, 3500.0, 3600.0, 3700.0, 3800.0, 3900.0, 4000.0, 4100.0, 4200.0, 4300.0, 4400.0, 4400.0, 4300.0, 4200.0, 4100.0, 4000.0, 3900.0, 3800.0, 3700.0, 3600.0, 3500.0, 3400.0, 3300.0, 3200.0, 3100.0, 3000.0, 2900.0, 2800.0, 2700.0, 2600.0, 2500.0, 2400.0, 2300.0, 2200.0, 2100.0, 2000.0, 1900.0, 1800.0, 1700.0, 1600.0, 1500.0, 1400.0, 1300.0, 1200.0, 1100.0, 1000.0, 900.0, 800.0, 700.0])
+xs_exp_limits_1sigma  = array('d', [0.019659099999999999, 0.014024999999999999, 0.010766400000000001, 0.0080981999999999998, 0.0056902400000000001, 0.0044511500000000001, 0.0033685500000000001, 0.00292239, 0.00219681, 0.0018908099999999999, 0.00171824, 0.0014066199999999999, 0.00112637, 0.00089374400000000003, 0.00078103299999999999, 0.00065738799999999996, 0.000576612, 0.00051246899999999999, 0.000443139, 0.00040373399999999999, 0.00035334899999999998, 0.00031905200000000001, 0.00029712, 0.00027100699999999998, 0.00025096599999999998, 0.00023758699999999999, 0.000221964, 0.00020823, 0.000198202, 0.000191089, 0.000189975, 0.00018075799999999999, 0.00018076799999999999, 0.00017893999999999999, 0.00017378200000000001, 0.000171972, 0.00017050100000000001, 0.00016899699999999999, 0.00022475199999999999, 0.00022978199999999999, 0.00023593099999999999, 0.00025755299999999999, 0.00025871100000000001, 0.000267435, 0.00029751199999999999, 0.000320453, 0.00035134800000000002, 0.00036557899999999999, 0.00039617999999999999, 0.00040651700000000001, 0.00043089000000000002, 0.00045058499999999998, 0.00050209600000000005, 0.00055750199999999998, 0.00060494900000000002, 0.00065624300000000004, 0.00077453500000000002, 0.00086432399999999997, 0.0010007799999999999, 0.0010857200000000001, 0.00125888, 0.00150954, 0.0017479500000000001, 0.00217059, 0.00258676, 0.00310904, 0.00370229, 0.0044219000000000003, 0.0056638499999999998, 0.0069878600000000003, 0.0087202200000000007, 0.0114564, 0.013916100000000001, 0.020055199999999999, 0.027130700000000001, 0.039656700000000003])
+xs_exp_limits_1sigma_fb = array('d', [1000.0 * float(b) for b in xs_exp_limits_1sigma ])
+
+xs_exp_limits_2sigma = array('d', [0.013560600000000001, 0.010405599999999999, 0.0082094500000000001, 0.0062964800000000001, 0.0040282599999999997, 0.00314767, 0.0028034900000000001, 0.0021145999999999999, 0.0017044499999999999, 0.0013115500000000001, 0.00122415, 0.00098990899999999997, 0.00080768400000000003, 0.00075814199999999995, 0.00056922699999999995, 0.00050217600000000001, 0.00045458599999999999, 0.00037949700000000002, 0.00036063300000000001, 0.00030932600000000001, 0.00027713100000000001, 0.000252978, 0.000241907, 0.00021710300000000001, 0.000208073, 0.00020620299999999999, 0.00019361899999999999, 0.000182614, 0.00018248599999999999, 0.00017779699999999999, 0.00017435899999999999, 0.00016998299999999999, 0.00016824200000000001, 0.000165842, 0.00016482700000000001, 0.00016392800000000001, 0.00016228099999999999, 0.000160428, 0.00029994700000000001, 0.00031836800000000003, 0.00032873599999999999, 0.00034657900000000002, 0.00034732099999999999, 0.00038060900000000001, 0.00040228099999999999, 0.00043333400000000001, 0.00046978100000000001, 0.00050705300000000004, 0.00053835600000000003, 0.00054139200000000002, 0.00054477400000000004, 0.00058193800000000005, 0.00065307099999999997, 0.00070246600000000001, 0.00082485100000000003, 0.00095921099999999996, 0.00107912, 0.00117888, 0.00143564, 0.00151505, 0.0018639800000000001, 0.0020187500000000001, 0.0023000300000000002, 0.0028554000000000001, 0.0033763600000000001, 0.00416928, 0.0050470200000000002, 0.0059294200000000004, 0.0079607299999999992, 0.010071, 0.0120267, 0.0163365, 0.018274700000000001, 0.026378700000000001, 0.035392300000000002, 0.054151699999999997])
+xs_exp_limits_2sigma_fb = array('d', [1000.0 * float(b) for b in xs_exp_limits_2sigma ])
+
+
+masses_qstar = array('d', [   1.5,     2.0,      2.5,      2.8,     2.85,      2.9,     2.95,        3.0,     3.05,      3.1,         3.5,      4.0,      4.5 ])
+xs_qstar     = array('d', [ 0.105, 0.01484, 0.002425, 8.565e-4, 7.245e-4, 6.082e-4, 5.083e-4,   4.304e-4, 3.607e-4, 3.044e-4,    7.586e-5, 1.258e-5, 1.929e-6 ])
+xs_qstar_fb  = array('d', [ 105.0,   14.84,    2.425, 8.565e-1, 7.245e-1, 6.082e-1, 5.083e-1,   4.304e-1, 3.607e-1, 3.044e-1,    7.586e-2, 1.258e-2, 1.929e-3 ])
+eff_qstar_5a = array ('d', [ 0.574006,  0.5866, 0.589884, 0.589784, 0.589484, 0.589085, 0.588994, 0.58802, 0.58772, 0.58715,  0.586875, 0.575593, 0.533674])
+
+xs_5a = array('d', [float(b) * float(m) for b,m in zip(xs_qstar_fb, eff_qstar_5a)])
+
+
+result= array('d',[0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9,4.0,4.1,4.2,4.3,4.4,4.4,4.3,4.2,4.1,4.0,3.9,3.8,3.7,3.6,3.5,3.4,3.3,3.2,3.1,3.0,2.9,2.8,2.7,2.6,2.5,2.4,2.3,2.2,2.1,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,0.9,0.8,0.7])
+
+graph_exp_2sigma = TGraph(len(masses_exp),result,xs_exp_limits_2sigma_fb)
+graph_exp_2sigma.SetFillColor(kYellow)
+graph_exp_2sigma.GetXaxis().SetTitle("q* Mass [TeV]")
+graph_exp_2sigma.GetYaxis().SetTitle("#sigma #times B #times A #times #epsilon [fb]")
+graph_exp_2sigma.GetYaxis().SetRangeUser(1e-01,300)
+graph_exp_2sigma.GetXaxis().SetNdivisions(510)
+graph_exp_2sigma.GetXaxis().SetLimits(0.6,4.5)
+
+graph_exp_2sigma.GetYaxis().CenterTitle()
+graph_exp_2sigma.GetYaxis().SetLabelSize(0.04)
+graph_exp_2sigma.GetYaxis().SetTitleOffset(1.1)
+graph_exp_2sigma.GetXaxis().CenterTitle()
+graph_exp_2sigma.GetXaxis().SetLabelSize(0.04)
+graph_exp_2sigma.GetXaxis().SetTitleOffset(1.1)
+graph_exp_2sigma.GetXaxis().CenterTitle()
+
+graph_exp_1sigma = TGraph(len(masses_exp),result,xs_exp_limits_1sigma_fb)
+graph_exp_1sigma.SetFillColor(kGreen+1)
+
+graph_exp = TGraph(len(masses),result,xs_exp_limits_fb)
+#graph_exp.SetMarkerStyle(24)
+graph_exp.SetLineWidth(2)
+graph_exp.SetLineStyle(2)
+graph_exp.SetLineColor(4)
+
+graph_obs = TGraph(len(masses),result,xs_obs_limits_fb)
+graph_obs.SetMarkerStyle(20)
+graph_obs.SetLineWidth(2)
+#graph_obs.SetLineStyle(1)
+graph_obs.SetLineColor(1)
+
+graph_qstar = TGraph(len(masses_qstar),masses_qstar,xs_5a)
+graph_qstar.SetLineWidth(2)                
+graph_qstar.SetLineColor(kMagenta+2)
+
+c = TCanvas("c", "",800,800)
+c.cd()
+
+graph_exp_2sigma.Draw("AF")
+graph_exp_1sigma.Draw("F")
+graph_exp.Draw("L")
+graph_obs.Draw("LP")
+graph_qstar.Draw("L")
+
+##legend = TLegend(.55,.69,.85,.92)  ## for pas twiki
+legend = TLegend(.58,.52,.89,.72)
+legend.SetBorderSize(0)
+legend.SetFillColor(0)
+legend.SetFillStyle(0)
+legend.SetTextFont(42)
+legend.SetTextSize(0.035)
+legend.SetHeader('95% CL upper limits')
+legend.AddEntry(graph_obs,"Observed limit","lp")
+legend.AddEntry(graph_exp,"Expected limit","lp")
+legend.AddEntry(graph_exp_1sigma,"Expected limit #pm 1#sigma","f")
+legend.AddEntry(graph_exp_2sigma,"Expected limit #pm 2#sigma","f")
+legend.Draw()
+
+legend1 = TLegend(.16,.18,.47,.24)
+legend1.SetBorderSize(0)
+legend1.SetFillColor(0)
+legend1.SetFillStyle(0)
+legend1.SetTextFont(42)
+legend1.SetTextSize(0.035)
+legend1.AddEntry(graph_qstar,"Excited quark (f = 0.5)","l")
+legend1.Draw()
+
+lumiTextSize = 0.6
+lumiTextOffset = 0.2
+lumi = TLatex()
+lumi.SetNDC()
+lumi.SetTextAngle(0)
+lumi.SetTextColor(kBlack)
+lumi.SetTextFont(42)
+lumi.SetTextAlign(31)
+lumi.SetTextSize(lumiTextSize*t_m)
+lumi.DrawLatex(1 - r_m, 1 - t_m +  lumiTextOffset*t_m, "19.7 fb^{-1} (8 TeV)")
+
+cmsTextFont = 61
+cmsTextSize = 0.75
+extraTextFont = 52
+extraOverCmsTextSize = 0.76
+relExtraDY = 1.2
+##posX_ = l_m     + 0.045 * (1 - l_m - r_m)  ##Top left
+##posX_ = l_m     + 0.5   * (1 - l_m - r_m)   ## Centre
+posX_ = 1 - r_m + 0.045 * (1 - l_m - r_m)  ## Top right
+posY_ = 1 - t_m - 0.035 * (1 - t_m - b_m)
+
+cms =  TLatex()
+cms.SetNDC()
+cms.SetTextFont(cmsTextFont)
+cms.SetTextSize(cmsTextSize * t_m)
+cms.SetTextAlign(33)  ### 11-top left;  21-top centre;  31-top right
+##cms.DrawLatex(posX_, posY_, "CMS")
+cms.DrawLatex(0.9, 0.9, "CMS")
+
+### if extra text (Unpublished or Preliminary)
+cms.SetTextFont(extraTextFont);
+cms.SetTextAlign(33);
+cms.SetTextSize(extraOverCmsTextSize*cmsTextSize*t_m);
+##cms.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t_m, extraText);
+cms.DrawLatex(0.9, 0.9 - relExtraDY*cmsTextSize*t_m, "Unpublished");
+
+l1 = TLatex()
+l1.SetNDC()
+l1.SetTextAlign(13)
+l1.SetTextFont(62)
+l1.SetTextSize(0.04)
+l1.SetTextFont(42)
+l1.DrawLatex(0.785,0.805, "q*#rightarrow q#gamma") ##0.21,0.26
+
+
+
+gPad.RedrawAxis();
+
+c.SetLogy()
+c.SaveAs('ExcitedQuarksToGJ_f0p5_ObseExp_xsBRAccEff_Limits_TEMP.pdf')
+#c.SaveAs('ExcitedQuarksToGJ_f0p5_ObseExp_xsBRAccEff_Limits.pdf')
+#c.SaveAs('ExcitedQuarksToGJ_f0p5_ObseExp_xsBRAccEff_Limits.png')
+
